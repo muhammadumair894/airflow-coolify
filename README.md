@@ -1,6 +1,11 @@
 # airflow-coolify
 MLOPs Pipeline
-
+```bash
+# Spin up stack locally
+cp .env.example .env
+export AIRFLOW_UID=$(id -u)
+docker compose up airflow-webserver airflow-scheduler
+open http://localhost:8080
 ---
 
 ## 3  Local Development Workflow
