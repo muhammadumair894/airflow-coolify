@@ -1,0 +1,41 @@
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:3.0.0
+  env_file: .env             # UID, secrets, creds
+  environment:
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${SECRET_KEY}
+    AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY}
+  volumes:
+    - dags:/opt/airflow/dags
+    - logs:/opt/airflow/logs
+    - plugins:/opt/airflow/plugins
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports: ["8080:8080"]
+    depends_on: [postgres, redis]
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on: [postgres, redis]
+
+volumes:
+  dags: {}
+  logs: {}
+  plugins: {}
+  pgdata: {}
